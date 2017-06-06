@@ -46,9 +46,6 @@ static getopt_arg_t options[] =
                 {NULL, 0,                         NULL, 0, NULL,                                                         NULL}
         };
 
-#if 0
-int string_to_bits(uint8_t **dst_ptr, const char *str);
-#endif
 void print_message_data(const uint8_t *data, int data_len, const char *action_description);
 
 int main(int argc, char **argv) {
@@ -214,29 +211,7 @@ int main(int argc, char **argv) {
                      "\n[g][ # ][/g] Covert channels setup finished. [g]%.2f%%[/g] of the channels are established, your system is [r]%s[/r][y]%s[/y].\n\n",
                      (correct * 100.0 / config.channels), correct ? "[ V U L N E R A B L E ]" : "",
                      correct ? "" : "[ maybe not vulnerable ]");
-#if 0
-        uint8_t bits[] = { 0, 0, 1, 1, 0, 1 };
-        if (send_bits_len > 0) {
-            printf("sending [ ");
-            for (int i = 0; i < send_bits_len; i++) {
-                printf("%d ", send_bits[i]);
-            }
-            printf("]\n");
-            uint8_t bits1[] = { 0, 1, 0, 0, 1, 1 };
-            uint8_t bits2[] = { 1, 0, 0, 1, 1, 0 };
-            uint8_t bits3[] = { 1, 0, 1, 0, 0, 1 };
-            //jag_send_bits(&config, send_bits, send_bits_len);
-            jag_send_bits(&config, bits1, sizeof(bits1));
-            jag_send_bits(&config, bits2, sizeof(bits2));
-            jag_send_bits(&config, bits3, sizeof(bits3));
-        }
-#endif
-        //const uint8_t data[] = { 'A', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', '!' };
-        //const uint8_t data[strlen(message) + 1];
-        //uint8_t data[1024];
-        //for (int i = 0; i < 1024; i++) {
-        //    data[i] = (uint8_t)(((i * i) >> 8) ^ (i * (i + 3)));
-        //}
+
         int data_len = strlen(message) + 1;
         print_message_data((const uint8_t*)message, data_len, "Sending");
         time_t t1 = time(NULL);
@@ -278,33 +253,14 @@ int main(int argc, char **argv) {
         //sleep(3); /* wait for sender */
         //printf("Press any key to start receiving...");
         //getchar();
-        /*
-        uint8_t dst_buf[config.channels];
-        memset(dst_buf, 0, sizeof(dst_buf));
-        printf("receive #1 started.\n");
-        jag_receive_bits(dst_buf, usable_sets, &config);
-        jag_receive_bits(dst_buf, usable_sets, &config);
-        jag_receive_bits(dst_buf, usable_sets, &config);
-        */
+
         uint8_t dst_buf[4096];
         time_t t1 = time(NULL);
         int data_size = receive_packet(&config, usable_sets, dst_buf, sizeof(dst_buf));
         time_t t2 = time(NULL);
         printf("Received %d bytes for %d seconds, speed = %g bytes/sec.\n", (int)data_size, (int)(t2 - t1), (double)data_size / (t2 - t1));
         print_message_data(dst_buf, data_size, "Received");
-        
-#if 0
-        printf("receive #2 started.\n");
-        jag_receive_bits(dst_buf, usable_sets, &config);
-#endif
-       
-#if 0
-        printf("received: [ ");
-        for (int i = 0; i < data_size; i++) {
-            printf("%x ", (unsigned)dst_buf[i]);
-        }
-        printf("]\n");
-#endif
+
         printf("Transfer finished.\n");
 
     }
@@ -439,41 +395,4 @@ void print_message_data(const uint8_t *data, int data_len, const char *action_de
         printf("]\n");
     }
 }
-
-#if 0
-int string_to_bits(uint8_t **dst_ptr, const char *str) {
-    int len      = -1;
-    uint8_t *dst = NULL;
-    if (!str) {
-        goto finalize;
-    }
-
-    len = strlen(str);
-    dst = (uint8_t*)malloc(len * sizeof(uint8_t));
-    for (int i = 0; i < len; i++) {
-        switch (str[i]) {
-            case '0': {
-                dst[i] = 0;
-            }; break;
-            case '1': {
-                dst[i] = 1;
-            }; break;
-            default: {
-                len = -1;
-                goto finalize;
-            }
-        }
-    }
-
-finalize:
-    if (len < 0) {
-        if (dst) {
-            free(dst);
-            dst = NULL;
-        }
-    }
-    *dst_ptr = dst;
-    return len;
-}
-#endif
 
