@@ -45,6 +45,11 @@
 # VIM temporary files
 *.sw*
 
+# Project binaries and other
+cnet
+test
+tags
+
 # Kernel Module Compile Results
 *.mod*
 *.cmd
