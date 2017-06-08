@@ -23,7 +23,7 @@ static const cncode_t index_to_code_map[] = {
 
 /**
  * This table is a reverse of the table above and allows to find code's
- * number (index)  * in the table above.<F12>
+ * number (index) in the table above.
  * Number -1 means there is no such code and equals NO_SUCH_CODE constant
  * defined in net/codemap.h file.
  */

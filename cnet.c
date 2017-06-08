@@ -26,8 +26,10 @@
 #include "util/getopt_helper.h"
 #include <net/transfer.h>
 
-enum { SPEEDUP_FACTOR = 1 };
+//enum { SPEEDUP_FACTOR = 0.5 };
 //enum { SPEEDUP_FACTOR = 2 };
+//#define SPEEDUP_FACTOR 0.5
+#define SPEEDUP_FACTOR 1
 
 static size_t *usable_sets;
 
@@ -217,7 +219,7 @@ int main(int argc, char **argv) {
         int data_len = strlen(message) + 1;
         print_message_data((const uint8_t*)message, data_len, "Sending");
         time_t t1 = time(NULL);
-        //config.jag_send_count /= SPEEDUP_FACTOR;
+        config.jag_send_count /= SPEEDUP_FACTOR;
         send_packet(&config, (const uint8_t*)message, data_len);
         time_t t2 = time(NULL);
         printf("Sent %d bytes for %d seconds, speed = %g bytes/sec.\n", (int)data_len, (int)(t2 - t1), (double)data_len / (t2 - t1));
@@ -257,9 +259,19 @@ int main(int argc, char **argv) {
         //printf("Press any key to start receiving...");
         //getchar();
 
+#if 0
+        watchdog_reset(config.watchdog);
+        sleep(1);
+        watchdog_reset(config.watchdog);
+        sleep(1);
+        for (int i = 0; i < 15; i++) {
+            watchdog_reset(config.watchdog);
+            sched_yield();
+        }
+#endif
         uint8_t dst_buf[4096];
         time_t t1 = time(NULL);
-        //config.jag_recv_count /= SPEEDUP_FACTOR;
+        config.jag_recv_count /= SPEEDUP_FACTOR;
         int data_size = receive_packet(&config, usable_sets, dst_buf, sizeof(dst_buf));
         time_t t2 = time(NULL);
         printf("Received %d bytes for %d seconds, speed = %g bytes/sec.\n", (int)data_size, (int)(t2 - t1), (double)data_size / (t2 - t1));

@@ -22,6 +22,11 @@ int send_packet(cjag_config_t *config, const uint8_t *data, size_t size) {
     // convert data to codes
     int idx = 0;
     packet[idx++] = index_to_code(CMD_PKT_BEGIN);
+#if 0
+    packet[idx++] = index_to_code(CMD_PKT_BEGIN2);
+    packet[idx++] = index_to_code(CMD_EXTENSION);
+    printf("packet[0] = %02x, packet[1] = %02x\n", (unsigned)packet[0], (unsigned)packet[1]);
+#endif
 
     /* 12 bits for packet size */
     int enc_data_bytes = encode(packet + idx + PACKET_SIZE_FIELD_LEN, data, size, -1);
@@ -75,6 +80,7 @@ int receive_packet(cjag_config_t *config, const size_t *sets_map, uint8_t *buffe
 
     int idx = 0;
     int final_bytes = 0;
+    int begin_bytes = 0;
     //for (idx = 0; idx < (int)max_size; idx++) {
     while ((stage != EXP_FINALIZE) && (idx < (int)max_size)) {
         cncode_t code;
@@ -86,6 +92,18 @@ int receive_packet(cjag_config_t *config, const size_t *sets_map, uint8_t *buffe
             goto finalize;
         }
         switch (stage) {
+#if 0
+            case EXP_BEGIN: {
+                begin_bytes++;
+                if ((res != CMD_PKT_BEGIN) && (res != CMD_PKT_BEGIN2) && (res != CMD_EXTENSION) && (begin_bytes >= 3)) {
+                    printf("Expected packet begin marker, got %d (index %d). Receiving packet aborted.\n", (int)code, (int)res);
+                    goto finalize;
+                }
+                if (res == CMD_EXTENSION) {
+                    stage = EXP_SIZE1;
+                }
+            } break;
+#else
             case EXP_BEGIN: {
                 if (res != CMD_PKT_BEGIN) {
                     printf("Expected packet begin marker, got %d (index %d). Receiving packet aborted.\n", (int)code, (int)res);
@@ -93,6 +111,7 @@ int receive_packet(cjag_config_t *config, const size_t *sets_map, uint8_t *buffe
                 }
                 stage = EXP_SIZE1;
             } break;
+#endif
             case EXP_SIZE1: {
                 data_size_codes[0] = code;
                 data_size_codes[1] = 0;
