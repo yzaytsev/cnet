@@ -42,6 +42,7 @@ void jag_send(cjag_config_t* config, jag_callback_t cb) {
 
 void jag_send_code(cjag_config_t *config, cncode_t code) {
     const int detection_threshold = 300;
+    //const int detection_threshold = 200;
 
     volatile uint8_t** addrs = (volatile uint8_t**)config->addr;
 

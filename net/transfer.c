@@ -44,6 +44,7 @@ int send_packet(cjag_config_t *config, const uint8_t *data, size_t size) {
     // call jag_send_bits (it is to be renamed to jag_send_code)
     for (int i = 0; i < idx; i++) {
         jag_send_code(config, packet[i]);
+        watchdog_reset(config->watchdog);
     }
     failed = 0;
 
@@ -78,6 +79,7 @@ int receive_packet(cjag_config_t *config, const size_t *sets_map, uint8_t *buffe
     while ((stage != EXP_FINALIZE) && (idx < (int)max_size)) {
         cncode_t code;
         jag_receive_code(&code, sets_map, config);
+        watchdog_reset(config->watchdog);
         int res = code_to_index(code);
         if (res == NO_SUCH_CODE) {
             printf("got unknown code %x, receive aborted.\n", (unsigned)code);

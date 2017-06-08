@@ -26,6 +26,9 @@
 #include "util/getopt_helper.h"
 #include <net/transfer.h>
 
+enum { SPEEDUP_FACTOR = 1 };
+//enum { SPEEDUP_FACTOR = 2 };
+
 static size_t *usable_sets;
 
 static getopt_arg_t options[] =
@@ -59,7 +62,7 @@ int main(int argc, char **argv) {
             .cache_probe_count = 3,
             .jag_send_count = 5000 * 3,
             .jag_recv_count = 15000 * 3,
-            .set_offset = 10,
+            .set_offset = 20,
             .timeout = 10,
             .packet_size = config.channels /* - 2 */,
             .watchdog = &watchdog_settings
@@ -194,7 +197,6 @@ int main(int argc, char **argv) {
         printf_color(config.color_output, "[g][ # ][/g] Checking sets...\n");
         watchdog_reset(config.watchdog);
         jag_receive(addrs, usable_sets, &config, watch_callback);
-        watchdog_done(config.watchdog);
         if(verbose) {
             printf_color(config.color_output, "[y]Eviction sets[/y]:\n");
             print_eviction_sets(addrs, &config);
@@ -215,9 +217,11 @@ int main(int argc, char **argv) {
         int data_len = strlen(message) + 1;
         print_message_data((const uint8_t*)message, data_len, "Sending");
         time_t t1 = time(NULL);
+        //config.jag_send_count /= SPEEDUP_FACTOR;
         send_packet(&config, (const uint8_t*)message, data_len);
         time_t t2 = time(NULL);
         printf("Sent %d bytes for %d seconds, speed = %g bytes/sec.\n", (int)data_len, (int)(t2 - t1), (double)data_len / (t2 - t1));
+        watchdog_done(config.watchdog);
     } else {
         printf_color(config.color_output, "[y]Receive mode[/y]: start [c]listening[/c]...\n\n");
         printf_color(config.color_output, "[g][ # ][/g] Receiving sets...\n");
@@ -247,7 +251,6 @@ int main(int argc, char **argv) {
         config.addr = addrs; // send back the received addresses
         jag_send(&config, probe_callback);
         config.addr = old_addr; // bit of a hack to prevent double free and memory leak...
-        watchdog_done(config.watchdog);
         printf_color(config.color_output, "\n[g][ # ][/g] Covert channels setup succeed!\n\n");
 
         //sleep(3); /* wait for sender */
@@ -256,12 +259,14 @@ int main(int argc, char **argv) {
 
         uint8_t dst_buf[4096];
         time_t t1 = time(NULL);
+        //config.jag_recv_count /= SPEEDUP_FACTOR;
         int data_size = receive_packet(&config, usable_sets, dst_buf, sizeof(dst_buf));
         time_t t2 = time(NULL);
         printf("Received %d bytes for %d seconds, speed = %g bytes/sec.\n", (int)data_size, (int)(t2 - t1), (double)data_size / (t2 - t1));
         print_message_data(dst_buf, data_size, "Received");
 
         printf("Transfer finished.\n");
+        watchdog_done(config.watchdog);
 
     }
 
