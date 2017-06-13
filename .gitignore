@@ -50,6 +50,8 @@ cnet
 test
 tags
 
+net/codemap_*_*.c
+
 # Kernel Module Compile Results
 *.mod*
 *.cmd
