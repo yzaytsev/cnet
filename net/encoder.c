@@ -2,14 +2,14 @@
 #include <net/encoder.h>
 
 size_t encoded_size(size_t data_size) {
-    return ((data_size + 1) * 8 / DATA_BITS_PER_CODE + 1);
+    return ((data_size + 1) * 8 / DATA_BITS_PER_CODE);
 }
 
 size_t decoded_size(size_t enc_size) {
     return ((enc_size + 1) * DATA_BITS_PER_CODE / 8 + 1);
 }
 
-int encode(cncode_t *dst, const uint8_t *src, size_t size, int bitsize) {
+static int encode_8_4(cncode_t *dst, const uint8_t *src, size_t size, int bitsize) {
     //int cpos = 0; /* pos in code */
     //for (size_t i = 0; i < size; i++) {
     int bit_limit = (bitsize >= 0) ? bitsize : (int)size * 8;
@@ -55,7 +55,7 @@ int encode(cncode_t *dst, const uint8_t *src, size_t size, int bitsize) {
     return (int)idx;
 }
 
-int decode(uint8_t *dst,  const cncode_t *src, size_t size) {
+static int decode_8_4(uint8_t *dst,  const cncode_t *src, size_t size) {
     //int dbit = 0;
     //int byte_pos = 0;
     int dbit = 0;
@@ -107,5 +107,62 @@ int decode(uint8_t *dst,  const cncode_t *src, size_t size) {
      * and at the decoding time we need only 16 bits of these 18 bits.
      */
     return dbit / 8;
+}
+
+
+static int encode_20_7(cncode_t *dst, const uint8_t *src, size_t size, int bitsize) {
+    //int bit_limit = (bitsize >= 0) ? bitsize : (int)size * 8;
+    int didx  = 0;
+    int first = 1;
+    unsigned x = 0;
+    for (int sidx = 0; sidx < size; sidx++) {
+        if (first) {
+            x = 0;
+            x |= (unsigned)src[sidx];
+            first = 0;
+        }
+        else {
+            x |= ((unsigned)src[sidx] << 8);
+            first = 1;
+            dst[didx++] = index_to_code(x + CMD_FIRST_DATA);
+        }
+    }
+
+    if (!first) {
+        dst[didx++] = index_to_code(x + CMD_FIRST_DATA);
+    }
+
+    return didx;
+}
+
+static int decode_20_7(uint8_t *dst,  const cncode_t *src, size_t size) {
+    int didx = 0;
+    for (size_t sidx = 0; sidx < size; sidx++, didx += 2) {
+        int res = code_to_index(src[sidx]);
+        if (res == NO_SUCH_CODE || res < CMD_FIRST_DATA || res > CMD_LAST_DATA) {
+            printf("cannot decode code %x (decoded to %d)!\n", (unsigned)src[sidx], res);
+            break;
+        }
+        res -= CMD_FIRST_DATA;
+
+        unsigned x = res;
+        dst[didx    ] = x & 0xffu;
+        dst[didx + 1] = (x >> 8) & 0xffu;
+    }
+    return didx;
+}
+
+
+#define MAKE_FUNCTION_NAME_NX(base, r1, r2) base ## _ ## r1 ## _ ## r2
+#define MAKE_FUNCTION_NAME(base, r1, r2) MAKE_FUNCTION_NAME_NX(base, r1, r2)
+#define ENCODE_FUNCTION_NAME MAKE_FUNCTION_NAME(encode, ENC_TOTAL_BITS, ENC_SET_BITS)
+#define DECODE_FUNCTION_NAME MAKE_FUNCTION_NAME(decode, ENC_TOTAL_BITS, ENC_SET_BITS)
+
+int encode(cncode_t *dst, const uint8_t *src, size_t size, int bitsize) {
+    return ENCODE_FUNCTION_NAME(dst, src, size, bitsize);
+}
+
+int decode(uint8_t *dst,  const cncode_t *src, size_t size) {
+    return DECODE_FUNCTION_NAME(dst, src, size);
 }
 

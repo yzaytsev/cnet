@@ -28,7 +28,7 @@
 
 //enum { SPEEDUP_FACTOR = 0.5 };
 //enum { SPEEDUP_FACTOR = 2 };
-//#define SPEEDUP_FACTOR 0.5
+//#define SPEEDUP_FACTOR 0.8
 #define SPEEDUP_FACTOR 1
 
 static size_t *usable_sets;
@@ -401,6 +401,7 @@ void print_message_data(const uint8_t *data, int data_len, const char *action_de
             break;
         }
     }
+    is_string = 1; /* YZ FIXME!!! TEMPORARY */
     if (is_string) {
         printf("\"%s\"\n", (const char*)data);
     }
