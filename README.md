@@ -1,26 +1,27 @@
-# CJAG 
+# Cachenet (CNET) 
 
-CJAG is an open-source implementation of our cache-based jamming agreement. 
-The CJAG implementation can be used to establish a cross-VM cache covert channel. The CJAG test application in this repository is used to test a cache-based communication between two co-located virtual machines. It can also be used locally for test and research purposes. 
+CNET is an open-source implementation of the cache-based data transfer protocol based on [CJAG (cache-based jamming agreement)](https://github.com/IAIK/CJAG).
 
-A thorough description can be found in our whitepaper
+CJAG is an open-source implementation of the cache-based jamming agreement which establishes a cross-VM cache covert channels. CNET uses CJAG code to establish covert channels and transfer data over them. It is also possible to use CNET locally for test purposes.
+
+A thorough description of the CJAG can be found in the whitepaper below:
  
  * [CJAG: Cache-based Jamming Agreement](https://www.blackhat.com/docs/asia-17/materials/asia-17-Schwarz-Hello-From-The-Other-Side-SSH-Over-Robust-Cache-Covert-Channels-In-The-Cloud-wp.pdf) (Michael Schwarz, Manuel Weber)
 
 A cache-based, robust covert channel based on CJAG can be found in our NDSS'17 paper
 
  * [Hello from the Other Side: SSH over Robust Cache Covert Channels in the Cloud](https://cmaurice.fr/pdf/ndss17_maurice.pdf) (Clémentine Maurice, Manuel Weber, Michael Schwarz, Lukas Giner, Daniel Gruss, Carlo Alberto Boano, Stefan Mangard, Kay Römer)
- 
+
 ## Table of contents
  
 * [Prerequisites](#prerequisites)
-* [Building CJAG from source](#building-cjag-from-source)
-* [Using CJAG](#using-cjag)
+* [Building CNET from source](#building-cnet-from-source)
+* [Using CNET](#using-cnet)
 * [FAQ](#faq)
 
 ## Prerequisites
 
-CJAG consists of multiple C files. There is no dependency on any external library, thus the only required packages are 
+CNET consists of multiple C files. There is no dependency on any external library, thus the only required packages are 
 
 * gcc
 * make
@@ -42,20 +43,20 @@ On Ubuntu, they can be installed using the package manager:
      
 and rebooting afterwards.
 
-## Building CJAG from source
+## Building CNET from source
 
-If all prerequisites are fulfilled, CJAG can be simply built by executing
+If all prerequisites are fulfilled, CNET can be simply built by executing
 
     make
     
-This results in a `cjag` binary.
+This results in a `cnet` binary.
 
-## Using CJAG
+## Using CNET
 
-The `cjag` binary includes both the sender and the receiver side. 
-The sender side runs `./cjag`whereas the receiver side runs `./cjag -r`. 
+The `cnet` binary includes both the sender and the receiver side. 
+The sender side runs `./cnet -m <message>` whereas the receiver side runs `./cnet -r`. 
 
-If you test CJAG locally, the parameter auto detection should be able to figure out all parameters and CJAG will just work. If, however, it does not work, you have to manually tweak the parameters. Run `./cjag --help` to get a list and explanation of all parameters. The most important ones are:
+If you test CNET locally, the parameter auto detection should be able to figure out all parameters and CNET will just work. If, however, it does not work, you have to manually tweak the parameters. Run `./cnet --help` to get a list and explanation of all parameters. The most important ones are:
 
  * **--cache-size**: The size of the last-level cache (also called LLC or L3) in bytes. 
  * **--ways**: The number of cache ways. Will usually be something like 12 or 16. 
@@ -64,14 +65,14 @@ If you test CJAG locally, the parameter auto detection should be able to figure 
 * **--delay**: If your computer (or VM) is slow, try to increase this value. This gives CJAG more time to react on. Important: this value has to be the same for the sender and the receiver.
 
 The whitepaper contains a table for these parameters for all environments we used to test CJAG (including Amazon EC2). 
-If CJAG was successful, the sender will display `Done. 100.00% of the channels are established, your system [ V U L N E R A B L E ].` 
-For a thorough explanation of the program's output please refer to the whitepaper. 
+If CNET was successful, the sender will display `Done. 100.00% of the channels are established, your system [ V U L N E R A B L E ].` and receiver will print message passed to the sender.
+For a thorough explanation of the program's output related to the cache jamming please refer to the CJAG whitepaper above. 
 
 ## FAQ
 
 * **I really like the auto detection/eviction set generation/eviction strategy/< insert any part here >. Can I use it in my own project?**
 
-   Yes, all parts of CJAG are open source and you are free to use it in your projects. 
+   Yes, all parts of CNET are open source and you are free to use it in your projects. 
 
 * **I get `*[ERROR] Could not retrieve cache sets, please try to restart*`**
 
