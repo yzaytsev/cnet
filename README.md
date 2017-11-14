@@ -4,7 +4,9 @@ CNET is an open-source implementation of the cache-based data transfer protocol 
 
 CJAG is an open-source implementation of the cache-based jamming agreement which establishes a cross-VM cache covert channels. CNET uses CJAG code to establish covert channels and transfer data over them. It is also possible to use CNET locally for test purposes.
 
-A thorough description of the CJAG can be found in the whitepaper below:
+In doc/CNET.pptx document there are slides with description of CNET communication protocol and CJAG basics.
+
+Also, a thorough description of the CJAG can be found in the whitepaper below:
  
  * [CJAG: Cache-based Jamming Agreement](https://www.blackhat.com/docs/asia-17/materials/asia-17-Schwarz-Hello-From-The-Other-Side-SSH-Over-Robust-Cache-Covert-Channels-In-The-Cloud-wp.pdf) (Michael Schwarz, Manuel Weber)
 
